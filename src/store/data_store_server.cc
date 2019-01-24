@@ -1,7 +1,26 @@
 #include "chirp.grpc.pb.h"
 
 class KeyValueStoreServiceImpl final : public Chirp::Service {
+  Status put(ServerContext* context, PutRequest* request) override {
+    bool status = store.put(request->key, request->value);
+    if (status) {
+      return Status::OK;
+    }
+    return Status::CANCELLED; // should error handling be handled in grpc or actual implementation?
+  }
 
+  Status get(ServerContext* context, 
+	     ServerReaderWriter(GetRequest, GetReply>* stream) override {
+    std::vector<GetRequest> received_requests;
+    GetRequest req;
+    while (stream->Read(&req)) {
+      for (const GetRequest r : received_requests) {
+        
+      }
+    }
+
+    return Status::OK;
+  }
 };
 
 void RunServer() {
