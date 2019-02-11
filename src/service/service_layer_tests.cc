@@ -48,6 +48,28 @@ TEST(ServiceLayerMakeChirp, MakeChirpNoReply) {
   EXPECT_TRUE(c.parent_id().empty());
 }
 
+TEST(ServiceLayerFollow, BaseFollow) {
+  ServiceLayer s;
+  ASSERT_TRUE(s.Register("root"));
+  ASSERT_TRUE(s.Register("follower"));
+
+  EXPECT_TRUE(s.Follow("follower", "root"));
+}
+
+TEST(ServiceLayerFollow, FollowUnregisteredUser) {
+  ServiceLayer s;
+  ASSERT_TRUE(s.Register("follower"));
+
+  EXPECT_FALSE(s.Follow("follower", "root"));
+}
+
+TEST(ServiceLayerFollow, FollowByUnregisteredUser) {
+  ServiceLayer s;
+  ASSERT_TRUE(s.Register("root"));
+
+  EXPECT_FALSE(s.Follow("follower", "root"));
+}
+
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
