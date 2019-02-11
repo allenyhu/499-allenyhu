@@ -40,7 +40,7 @@ TEST(ServiceLayerMakeChirp, BaseMakeChirp) {
 
 TEST(ServiceLayerMakeChirp, MakeChirpNoReply) {
   ServiceLayer s;
-  Chirp c = s.MakeChirp("test", "test text", nullptr);
+  Chirp c = s.MakeChirp("test", "test text", std::nullopt);
   ASSERT_FALSE(c.id().empty());
 
   EXPECT_EQ("test", c.username());
