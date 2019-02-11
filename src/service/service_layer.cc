@@ -16,3 +16,10 @@ Chirp ServiceLayer::MakeChirp(const std::string& uname, const std::string& text,
   }
   return Chirp();
 }
+
+bool Follow(const std::string& uname, const std::string& follow_uname) {
+  if(ds_.Get(uname).empty() || ds_.Get(follow_uname).empty()) {
+    return false;
+  }
+  return ds_.Put(uname, follow_uname);
+}
