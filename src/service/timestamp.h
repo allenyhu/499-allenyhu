@@ -1,5 +1,6 @@
 #include <sys/time.h>
 
+// Wrapper class for Timestamp message
 class Timestamp {
  public:
   // Default constructor for Timestamp

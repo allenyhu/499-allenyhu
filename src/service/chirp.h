@@ -3,6 +3,7 @@
 
 #include "timestamp.h"
 
+// Wrapper object for Chirp message
 class Chirp {
  public:
   // Constructor for Chirp object
