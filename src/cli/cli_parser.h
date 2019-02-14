@@ -1,3 +1,6 @@
+#ifndef SRC_CLI_CLI_PARSER_H_
+#define SRC_CLI_CLI_PARSER_H_
+
 #include <string>
 #include <unistd.h>
 
@@ -5,6 +8,7 @@
 
 #include "../service/service_layer_client.h"
 
+// GFLAG declarations for CLI args
 DECLARE_string(user);
 DECLARE_string(chirp);
 DECLARE_string(reply);
@@ -22,6 +26,7 @@ class CliParser {
   std::string Parse(int argc, char** argv);
  
  private:
+  // ServiceLayerClient that connects CLI to the ServiceLayerServer
   ServiceLayerClient service_;
 
   // Helper function to parse register command
@@ -39,3 +44,5 @@ class CliParser {
   // Helper function to parse monitor command
   std::string ParseMonitor(const std::string& uname);
 };
+
+#endif //SRC_CLI_CLI_PARSER_H_
