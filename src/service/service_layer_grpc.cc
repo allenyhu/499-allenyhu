@@ -5,9 +5,13 @@ ServiceLayerObj::ServiceLayerObj()
                               grpc::InsecureChannelCredentials())) {}
 
 bool ServiceLayerObj::Register(const std::string& uname) {
+  // storing all users
+  std::vector<std::string> entry = ds_.Get(kAllUserKey_); 
+
   if (uname.empty() || !ds_.Get(uname).empty()) {
     return false;
   }
+  ds_.Put(kAllUserKey_,uname);
   return ds_.Put(uname, "registered");
 }
 
@@ -29,6 +33,8 @@ ChirpObj ServiceLayerObj::MakeChirp(
 
   return ChirpObj();
 }
+
+
 
 void ServiceLayerObj::MakeReply(const std::string& parent_id,
                                 const std::string& chirp_string) {
@@ -103,6 +109,36 @@ void ServiceLayerObj::ReadDfs(const std::string& key_base,
   ReadDfs(key_base, chirps, counter + 1);
 }
 
+std::vector<ChirpObj> ServiceLayerObj::HashTag(const std::string& uname,const std::string& hash_tag) {
+  //getting all users
+  std::vector<std::string> users = ds_.Get(kAllUserKey_); 
+  for (const std::string& u : users) {
+    PutMonitorKey(uname, u);
+  }
+
+  std::vector<ChirpObj> chirps;
+  std::string monitor_check_base = uname + kMonitorCheckKey_;
+  int counter = 0;
+  std::string key = monitor_check_base + std::to_string(counter);
+  std::vector<std::string> entry = ds_.Get(key);
+
+  // Loop over all potential monitor keys present
+  while (!entry.empty()) {
+    ChirpObj c = ParseChirpString(entry[0]);
+    bool contain =  CheckTag(c,hash_tag);
+    if(contain){
+       chirps.push_back(c);
+    }
+    // No longer need this key once entry has been stored
+    ds_.DeleteKey(key);
+    counter++;
+    key = monitor_check_base + std::to_string(counter);
+    entry = ds_.Get(key);
+  }
+
+  return chirps;
+}
+
 std::vector<ChirpObj> ServiceLayerObj::Monitor(const std::string& uname) {
   std::vector<std::string> users = GetUsersFollowed(uname);
 
@@ -129,6 +165,46 @@ std::vector<ChirpObj> ServiceLayerObj::Monitor(const std::string& uname) {
   }
 
   return chirps;
+}
+
+bool ServiceLayerObj::CheckTag(ChirpObj &chirp,const std::string& hash_tag){
+      //bool to check if contain hash rag
+      bool contain = false;
+      //text of chirp
+      std::string text = chirp.text();
+      // holds all the positions that sub occurs within #
+      std::vector<size_t> positions; 
+      size_t pos = text.find("#", 0);
+      while(pos != std::string::npos)
+      {
+          positions.push_back(pos);
+          pos = text.find("#",pos+1);
+      }
+      if(positions.size() == 0){
+        return false;
+      }
+
+      //check all positions with #
+      for(auto p:positions){
+        std::string sub = text.substr(p);
+        std::size_t pos1 = sub.find(" ");
+        std::string tag = sub.substr (1,pos1);
+        //trim the tags with white space
+        tag.erase( std::remove_if( tag.begin(), tag.end(), ::isspace ), tag.end() );
+        if(tag == hash_tag){
+          // std::cout<<tag<<std::endl;
+          // std::cout<<hash_tag<<std::endl;
+          contain = true;
+        }
+      }
+      //if doesnt contain 
+      if(contain == false){
+        return false;
+      }else{
+        return true;
+      }
+
+  return contain;
 }
 
 void ServiceLayerObj::PutMonitorKey(const std::string& uname,
@@ -183,6 +259,7 @@ void ServiceLayerObj::UpdateMonitor(const std::string& uname,
 
   ds_.Put(key, chirp_string);
 }
+
 
 std::vector<std::string> ServiceLayerObj::GetUsersFollowed(
     const std::string& uname) {

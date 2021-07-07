@@ -9,6 +9,9 @@
 
 #include "chirp_obj.h"
 #include "store/data_store_client.h"
+#include "service_layer.grpc.pb.h"
+
+using chirp::Users;
 
 // Model class for GRPC version of service layer component of Chirp system
 class ServiceLayerObj {
@@ -45,7 +48,15 @@ class ServiceLayerObj {
   // @ret: the Chirps of all followed users
   std::vector<ChirpObj> Monitor(const std::string& uname);
 
+  // Streams Chirps from all followed users
+  // @uname: the user requesting the monitor
+  // @ret: the Chirps of all followed users
+  std::vector<ChirpObj> HashTag(const std::string& uname,const std::string& hash_tag);
+
  private:
+  //Store all users
+  const std::string kAllUserKey_ = "-all-user-key";
+
   // Used for follow storage in store
   const std::string kFollowKey_ = "-follow-";
 
@@ -70,6 +81,11 @@ class ServiceLayerObj {
   // @chirp: the string rep of a ChirpObj stored in the DataStore
   // @ret: ChirpObj constructed from `chirp`
   ChirpObj ParseChirpString(const std::string& chirp);
+
+  // Helper function to parse data from DataStore
+  // @hash_tag hash tag being check
+  // @ret: vectors of ChirpObj containing hash tags
+  bool CheckTag(ChirpObj &chirps,const std::string& hash_tag);
 
   // Helper function to set up Read data for Chirps replying to another Chirp
   // @parent_id: id of the Chirp being replied to
